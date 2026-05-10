@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Анти ИИ Навигатор">
     <title>Анти ИИ Навигатор (Прямо)</title>
+    
+    <!-- 🔷 PWA: Встроенный манифест (работает без manifest.json) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Анти ИИ Навигатор (Прямо)","short_name":"Навигатор","start_url":"./index.html","display":"standalone","background_color":"#000000","theme_color":"#00ff41","orientation":"portrait","icons":[{"src":"favicon.ico","sizes":"32x32","type":"image/x-icon"}]}'>
     
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="shortcut icon" href="favicon.ico">
@@ -19,6 +24,16 @@
         /* 🔷 ЛОГОТИП */
         .logo-top { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 100; background: rgba(0,15,0,0.7); backdrop-filter: blur(12px); border-radius: 40px; padding: 6px 16px; border: 1px solid rgba(0,255,65,0.4); display: flex; align-items: center; gap: 8px; pointer-events: none; }
         .logo-top img { width: 32px; height: 32px; display: block; filter: drop-shadow(0 0 6px rgba(0,255,65,0.6)); }
+        
+        /* 🟢 ИНДИКАТОР ФОНОВОЙ РАБОТЫ (новое) */
+        .bg-indicator {
+            position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px;
+            width: 10px; height: 10px; background: #ff4444; border-radius: 50%;
+            border: 2px solid #000; z-index: 101; transition: all 0.3s;
+            box-shadow: 0 0 8px currentColor;
+        }
+        .bg-indicator.active { background: #00ff41; animation: bgPulse 2s infinite; }
+        @keyframes bgPulse { 0%,100% { opacity:1; box-shadow:0 0 8px #00ff41; } 50% { opacity:0.5; box-shadow:0 0 2px #00ff41; } }
         
         /* СТРАНИЦА 1: ЗАСТАВКА */
         #page-splash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; background: #000; }
@@ -41,12 +56,26 @@
         .calib-title { font-size: 1.3rem; color: #00ff41; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; }
         .calib-hint { font-size: 0.9rem; color: #ffaa33; background: rgba(30,30,10,0.7); padding: 14px; border-radius: 28px; margin: 15px 0; }
         
-        /* Прогресс бар калибровки */
         .calib-progress-wrap { margin: 20px 0; width: 100%; max-width: 260px; }
         .calib-progress-bg { background: rgba(255,255,255,0.1); border-radius: 20px; height: 12px; overflow: hidden; }
         .calib-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00ff41, #00cc33); transition: width 0.1s linear; border-radius: 20px; }
         .calib-status { font-size: 0.8rem; color: #888; margin-top: 12px; min-height: 3.2rem; display: flex; align-items: center; justify-content: center; text-align: center; }
         .calib-status.ok { color: #00ff41; font-weight: bold; }
+        
+        /* 🔴 БЛОК ПОВТОРНОГО ЗАПРОСА РАЗРЕШЕНИЙ (новое) */
+        .perm-denied {
+            display: none; background: rgba(40,10,10,0.9); border: 1px solid #ff4444;
+            border-radius: 20px; padding: 12px; margin: 10px 0; text-align: center;
+        }
+        .perm-denied.show { display: block; animation: fadeIn 0.3s; }
+        .perm-denied p { font-size: 0.75rem; color: #ff8888; margin-bottom: 8px; }
+        .retry-btn {
+            background: linear-gradient(145deg, rgba(40,20,20,0.9), rgba(20,5,5,0.98));
+            border: 1px solid #ff6666; color: #ff8888; padding: 8px 20px;
+            border-radius: 30px; font-size: 0.8rem; cursor: pointer; font-weight: 600;
+        }
+        .retry-btn:active { background: #ff4444; color: #000; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
         
         .phone-number { background: rgba(30,30,30,0.8); padding: 12px; border-radius: 50px; font-size: 1rem; font-family: monospace; color: #00ff41; margin: 12px 0; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .copy-btn { background: #2a4a2a; border: none; padding: 6px 14px; border-radius: 30px; color: #0f0; font-size: 0.75rem; cursor: pointer; }
@@ -83,7 +112,11 @@
 </head>
 <body>
 <div class="screen">
+    <!-- 🔷 ЛОГОТИП -->
     <div class="logo-top"><img src="favicon.ico" alt="logo" id="mainLogo"></div>
+    
+    <!-- 🟢 ИНДИКАТОР ФОНОВОЙ РАБОТЫ (новое) -->
+    <div class="bg-indicator" id="bgIndicator" title="Работает в фоне"></div>
     
     <!-- СТРАНИЦА 1: ЗАСТАВКА -->
     <div id="page-splash">
@@ -96,13 +129,14 @@
         <div class="calib-card">
             <div class="calib-title">🧭 КАЛИБРОВКА 🔄</div>
             <div class="calib-hint">🔄 Покрутите телефон «восьмёркой» 3-5 секунд</div>
-            
-            <!-- Прогресс бар -->
-            <div class="calib-progress-wrap">
-                <div class="calib-progress-bg"><div class="calib-progress-fill" id="calibProgress"></div></div>
-            </div>
-            
+            <div class="calib-progress-wrap"><div class="calib-progress-bg"><div class="calib-progress-fill" id="calibProgress"></div></div></div>
             <div class="calib-status" id="calibStatus">📡 Ожидание движения...</div>
+            
+            <!-- 🔴 БЛОК ПОВТОРНОГО ЗАПРОСА РАЗРЕШЕНИЙ (новое) -->
+            <div class="perm-denied" id="permDenied">
+                <p>⚠️ Доступ к датчикам отклонён</p>
+                <button class="retry-btn" id="retryPermBtn">🔄 Повторить запрос</button>
+            </div>
         </div>
         
         <div class="support-card">
@@ -143,9 +177,34 @@
     }
     function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
     
+    // 🔐 РАЗРЕШЕНИЯ ДЛЯ iOS/ANDROID 13+
+    let sensorPermission = null;
+    async function requestSensorPermission() {
+        if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+            try {
+                const perm = await DeviceOrientationEvent.requestPermission();
+                sensorPermission = (perm === 'granted');
+                return sensorPermission;
+            } catch(e) { sensorPermission = false; return false; }
+        }
+        sensorPermission = true; return true;
+    }
+    
+    // 🔴 ПОВТОРНЫЙ ЗАПРОС РАЗРЕШЕНИЙ (новое)
+    function showPermDenied() {
+        const el = document.getElementById('permDenied');
+        if (el) el.classList.add('show');
+    }
+    function hidePermDenied() {
+        const el = document.getElementById('permDenied');
+        if (el) el.classList.remove('show');
+    }
+    
     function unlockAudio() {
-        if (window.audioUnlocked) return; window.audioUnlocked = true;
+        if (window.audioUnlocked) return;
+        window.audioUnlocked = true;
         const t = new Audio(); t.volume = 0.01; t.play().catch(()=>{});
+        requestSensorPermission();
     }
     document.addEventListener('click', unlockAudio, {once:true, passive:true});
     document.addEventListener('touchstart', unlockAudio, {once:true, passive:true});
@@ -155,10 +214,11 @@
     const splashImg = document.getElementById('splash-img'), splashVideo = document.getElementById('splash-video');
     let videoStarted = false, splashEnded = false;
     
-    document.getElementById('soundBtn').onclick = () => {
-        soundEnabled = !soundEnabled; splashVideo.muted = !soundEnabled;
+    document.getElementById('soundBtn').onclick = async () => {
+        soundEnabled = !soundEnabled;
+        splashVideo.muted = !soundEnabled;
         document.getElementById('soundBtn').innerHTML = soundEnabled ? '🔊 Звук вкл' : '🔇 Включить звук';
-        if (soundEnabled) unlockAudio();
+        if (soundEnabled) { unlockAudio(); await requestSensorPermission(); }
     };
     
     function showVideo() {
@@ -175,72 +235,58 @@
     else { splashImg.onload = () => setTimeout(showVideo, 2000); setTimeout(() => { if (!videoStarted) showVideo(); }, 2500); }
     
     // ========== КАЛИБРОВКА: СТРОГИЙ ДЕТЕКТОР "ВОСЬМЁРКИ" ==========
-    let calibDone = false;
-    let calibRotation = 0;        // Накопленные градусы
-    let calibStartTime = 0;       // Время начала вращения
-    let lastOri = { a: null, b: null, g: null };
-    
-    // НАСТРОЙКИ КАЛИБРОВКИ
-    const CALIB_TARGET = 320;     // Нужно набрать 320 градусов (почти полный оборот)
-    const CALIB_MIN_TIME = 2000;  // Минимум 2 секунды активного вращения
+    let calibDone = false, calibRotation = 0, calibStartTime = 0, lastOri = {a:null,b:null,g:null};
+    const CALIB_TARGET = 320, CALIB_MIN_TIME = 2000;
+    let calibOriListener = null;
     
     function startCalibrationCheck() {
-        const statusEl = document.getElementById('calibStatus');
-        const progressEl = document.getElementById('calibProgress');
+        const statusEl = document.getElementById('calibStatus'), progressEl = document.getElementById('calibProgress');
         
-        // Слушаем ОРИЕНТАЦИЮ (повороты), а не ускорение
-        const handleCalibOri = (e) => {
-            if (calibDone) return;
-            
-            const a = e.alpha ?? 0, b = e.beta ?? 0, g = e.gamma ?? 0;
-            
-            // Если это первый кадр — просто запоминаем углы
-            if (lastOri.a === null) { lastOri = {a,b,g}; return; }
-            
-            // Считаем изменение углов с учётом перехода через 360/0
-            const da = Math.abs(a - lastOri.a); const na = da > 180 ? 360 - da : da;
-            const db = Math.abs(b - lastOri.b); const nb = db > 180 ? 360 - db : db;
-            const dg = Math.abs(g - lastOri.g); const ng = dg > 180 ? 360 - dg : dg;
-            
-            // Добавляем к общему счёту
-            calibRotation += (na + nb + ng);
-            lastOri = {a,b,g};
-            
-            // Обновляем визуальный прогресс
-            const pct = Math.min((calibRotation / CALIB_TARGET) * 100, 100);
-            progressEl.style.width = `${pct}%`;
-            
-            // Если набрали нужные градусы
-            if (calibRotation >= CALIB_TARGET) {
-                // Проверяем, крутили ли мы достаточно долго (защита от резкого рывка)
-                const duration = Date.now() - calibStartTime;
-                if (duration >= CALIB_MIN_TIME) {
-                    completeCalibration();
-                }
-            }
-        };
-        
-        function completeCalibration() {
-            if (calibDone) return;
-            calibDone = true;
-            window.removeEventListener('deviceorientation', handleCalibOri);
-            
-            const statusEl = document.getElementById('calibStatus');
-            statusEl.innerHTML = '✅ Калибровка пройдена!<br>⏳ Переход...';
-            statusEl.className = 'calib-status ok';
-            document.getElementById('calibProgress').style.background = '#00ff41';
-            
-            setTimeout(() => {
-                pageCalibrate.classList.remove('show');
-                pageCompass.classList.add('show');
-                initCompass();
-            }, 1200);
+        // 🔴 Если разрешения нет — показываем кнопку "Повторить"
+        if (sensorPermission === false) {
+            showPermDenied();
+            statusEl.textContent = '⚠️ Нет доступа к датчикам';
+            return;
         }
         
-        window.addEventListener('deviceorientation', handleCalibOri, {passive:true});
+        calibOriListener = (e) => {
+            if (calibDone) return;
+            const a = e.alpha ?? 0, b = e.beta ?? 0, g = e.gamma ?? 0;
+            if (lastOri.a === null) { lastOri = {a,b,g}; return; }
+            const da = Math.abs(a - lastOri.a), na = da > 180 ? 360 - da : da;
+            const db = Math.abs(b - lastOri.b), nb = db > 180 ? 360 - db : db;
+            const dg = Math.abs(g - lastOri.g), ng = dg > 180 ? 360 - dg : dg;
+            calibRotation += (na + nb + ng); lastOri = {a,b,g};
+            const pct = Math.min((calibRotation / CALIB_TARGET) * 100, 100);
+            progressEl.style.width = `${pct}%`;
+            if (calibRotation >= CALIB_TARGET) {
+                const duration = Date.now() - calibStartTime;
+                if (duration >= CALIB_MIN_TIME) completeCalibration();
+            }
+        };
+        window.addEventListener('deviceorientation', calibOriListener, {passive:true});
+        
+        function completeCalibration() {
+            if (calibDone) return; calibDone = true;
+            if (calibOriListener) window.removeEventListener('deviceorientation', calibOriListener);
+            statusEl.innerHTML = '✅ Калибровка пройдена!<br>⏳ Переход...';
+            statusEl.className = 'calib-status ok'; progressEl.style.background = '#00ff41';
+            setTimeout(() => { pageCalibrate.classList.remove('show'); pageCompass.classList.add('show'); initCompass(); }, 1200);
+        }
     }
     
-    // Копирование номера
+    // 🔴 ОБРАБОТЧИК КНОПКИ "ПОВТОРИТЬ ЗАПРОС" (новое)
+    document.getElementById('retryPermBtn')?.addEventListener('click', async () => {
+        hidePermDenied();
+        const granted = await requestSensorPermission();
+        if (granted) {
+            document.getElementById('calibStatus').textContent = '✅ Доступ получен! Начинайте калибровку...';
+            startCalibrationCheck(); // Перезапускаем калибровку
+        } else {
+            showPermDenied(); // Снова показываем, если отказали
+        }
+    });
+    
     document.getElementById('copyPhoneBtn').onclick = async () => {
         try { await navigator.clipboard.writeText('8-920-227-56-76'); const b=document.getElementById('copyPhoneBtn'); b.textContent='✅ Скопировано!'; setTimeout(()=>b.textContent='📋 Копировать номер',2000); }
         catch(e) { alert('Нажмите и удерживайте номер для копирования'); }
@@ -250,6 +296,7 @@
     let targetAngle = null, isTracking = false, lastCommandTime = 0, pulseTimer = null, isMoving = false;
     let stopTimeout = null, resetTimer = null, lastHeading = 0, lastHeadingTime = 0, compassReliable = false;
     let wakeLock = null, batteryWarned = false;
+    let motionListener = null, oriListenerAbs = null, oriListener = null;
     
     const startBtn = document.getElementById('startBtn'), resetBtn = document.getElementById('resetBtn');
     const arrow = document.getElementById('arrow'), angleSpan = document.getElementById('angle');
@@ -257,6 +304,19 @@
     const calibHint = document.getElementById('calib-hint'), batLevelSpan = document.getElementById('batLevel');
     const driftStatusSpan = document.getElementById('driftStatus'), pulseStatusSpan = document.getElementById('pulseStatus');
     
+    // 🟢 ИНДИКАТОР ФОНОВОЙ РАБОТЫ (новое)
+    const bgIndicator = document.getElementById('bgIndicator');
+    function updateBgIndicator() {
+        if (!bgIndicator) return;
+        // Зелёная точка = приложение активно и держит wakeLock
+        if (isTracking && wakeLock) {
+            bgIndicator.classList.add('active');
+        } else {
+            bgIndicator.classList.remove('active');
+        }
+    }
+    
+    // 🔋 БАТАРЕЯ
     if ('getBattery' in navigator) {
         navigator.getBattery().then(batt => {
             const update = () => {
@@ -269,32 +329,43 @@
         });
     }
     
-    window.addEventListener('devicemotion', (e) => {
+    // 🚶 ДЕТЕКТОР ДВИЖЕНИЯ
+    motionListener = (e) => {
         const a = e.accelerationIncludingGravity; if (!a) return;
         const force = Math.sqrt(a.x**2 + a.y**2 + a.z**2);
-        if (Math.abs(force - 9.8) > 0.25) { isMoving = true; if (stopTimeout) clearTimeout(stopTimeout); }
+        if (Math.abs(force - 9.8) > 2.2) { isMoving = true; if (stopTimeout) clearTimeout(stopTimeout); }
         else { if (!stopTimeout) stopTimeout = setTimeout(() => { isMoving = false; stopTimeout = null; }, 5000); }
-    });
+    };
+    window.addEventListener('devicemotion', motionListener, {passive:true});
     
+    // 💓 ПУЛЬС
     function startPulse() {
         if (pulseTimer) clearInterval(pulseTimer);
         pulseTimer = setInterval(() => {
-            if (isTracking) { vibrate(40); pulseStatusSpan.textContent = '💓 ПУЛЬС'; setTimeout(() => { if (!isTracking) pulseStatusSpan.textContent = '💓 --'; else pulseStatusSpan.textContent = '💓'; }, 800); }
+            if (!isTracking) return;
+            vibrate(40);
+            pulseStatusSpan.textContent = '💓';
+            pulseStatusSpan.style.color = '#00ff41';
+            pulseStatusSpan.style.textShadow = '0 0 8px #00ff41';
+            setTimeout(() => {
+                if (isTracking) { pulseStatusSpan.textContent = '💓 --'; pulseStatusSpan.style.color = '#3a8a3a'; pulseStatusSpan.style.textShadow = 'none'; }
+            }, 400);
         }, 30000);
     }
-    function stopPulse() { if (pulseTimer) { clearInterval(pulseTimer); pulseTimer = null; pulseStatusSpan.textContent = '💓 --'; } }
+    function stopPulse() { if (pulseTimer) { clearInterval(pulseTimer); pulseTimer = null; pulseStatusSpan.textContent = '💓 --'; pulseStatusSpan.style.color = '#3a8a3a'; } }
     
+    // 🔒 ТОЧНОСТЬ
     function checkAccuracy(accuracy) {
         const isGood = accuracy <= 25 && accuracy >= 0; compassReliable = isGood;
         if (!isGood) { calibHint.classList.add('show'); if (!isTracking) { startBtn.disabled = true; startBtn.textContent = '⚠️ КАЛИБРОВКА'; } arrow.classList.add('unreliable'); }
         else { calibHint.classList.remove('show'); if (!isTracking) { startBtn.disabled = false; startBtn.textContent = '🎯 ЗАДАТЬ КУРС'; } arrow.classList.remove('unreliable'); }
     }
     
+    // 🧭 ОСНОВНОЙ ДАТЧИК
     function handleOrientation(event) {
         let heading = event.webkitCompassHeading || (360 - event.alpha); if (heading === undefined) return;
         const accuracy = event.webkitCompassAccuracy || event.accuracy || 25;
         angleSpan.textContent = Math.round(heading) + '°'; checkAccuracy(accuracy);
-        
         const now = Date.now();
         if (lastHeadingTime > 0 && now - lastHeadingTime < 1000) {
             const delta = Math.abs(heading - lastHeading);
@@ -302,14 +373,12 @@
             else { driftStatusSpan.textContent = 'GYRO OK'; driftStatusSpan.classList.remove('err'); }
         }
         lastHeading = heading; lastHeadingTime = now;
-        
         if (isTracking && targetAngle !== null && compassReliable) {
             let diff = heading - targetAngle;
             if (diff > 180) diff -= 360; if (diff < -180) diff += 360;
             const absDiff = Math.abs(diff);
             arrow.style.transform = `rotate(${-diff}deg)`;
             targetSpan.textContent = `🎯 Цель: ${targetAngle}° | откл: ${absDiff.toFixed(0)}°`;
-            
             if (absDiff > 140) { playSound('back'); vibrate([400, 150, 400, 150, 400]); statusTextSpan.textContent = '🔄 РАЗВОРОТ! НАЗАД!'; statusTextSpan.style.color = '#f44'; lastCommandTime = Date.now(); return; }
             const nowTime = Date.now();
             if (isMoving && absDiff > 15 && nowTime - lastCommandTime > 3500) {
@@ -320,31 +389,63 @@
         } else { arrow.style.transform = 'rotate(0deg)'; }
     }
     
+    // 🚀 СТАРТ
     async function startTracking() {
+        const permOk = await requestSensorPermission();
+        if (!permOk) { showPermDenied(); statusTextSpan.textContent = '❌ Нет доступа к датчикам'; return; }
+        hidePermDenied();
         if (!compassReliable) { playSound('calibrate'); vibrate([300, 100, 300]); return; }
-        if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
-            try { const perm = await DeviceOrientationEvent.requestPermission(); if (perm !== 'granted') throw new Error(); } catch(e) { statusTextSpan.textContent = '❌ Нет доступа к датчикам'; return; }
-        }
         startBtn.style.display = 'none';
         let count = 5;
-        const timer = setInterval(() => { statusTextSpan.textContent = `📱 В КАРМАН: ${count}`; if (count-- <= 0) { clearInterval(timer); targetAngle = Math.round(parseInt(angleSpan.textContent)); isTracking = true; batteryWarned = false; statusTextSpan.textContent = `✅ КУРС ${targetAngle}°`; playSound('straight'); vibrate([100, 50, 100]); resetBtn.style.display = 'block'; startPulse(); if ('wakeLock' in navigator) { navigator.wakeLock.request('screen').then(lock => { wakeLock = lock; }).catch(() => {}); } } }, 1000);
+        const timer = setInterval(() => { statusTextSpan.textContent = `📱 В КАРМАН: ${count}`; if (count-- <= 0) { clearInterval(timer); targetAngle = Math.round(parseInt(angleSpan.textContent)); isTracking = true; batteryWarned = false; statusTextSpan.textContent = `✅ КУРС ${targetAngle}°`; playSound('straight'); vibrate([100, 50, 100]); resetBtn.style.display = 'block'; startPulse(); updateBgIndicator(); if ('wakeLock' in navigator) { navigator.wakeLock.request('screen').then(lock => { wakeLock = lock; updateBgIndicator(); }).catch(() => {}); } } }, 1000);
     }
     
+    // 🔄 СБРОС
     function resetTracking() {
         isTracking = false; targetAngle = null; resetBtn.style.display = 'none'; startBtn.style.display = 'block';
         arrow.style.transform = 'rotate(0deg)'; targetSpan.textContent = '🎯 ЦЕЛЬ: —'; statusTextSpan.textContent = '🎯 КУРС СБРОШЕН'; statusTextSpan.style.color = '#666';
         vibrate(200); stopPulse(); if (wakeLock) { wakeLock.release(); wakeLock = null; }
+        updateBgIndicator();
         if (compassReliable) { startBtn.disabled = false; startBtn.textContent = '🎯 ЗАДАТЬ КУРС'; }
     }
-    
     resetBtn.addEventListener('touchstart', (e) => { e.preventDefault(); resetTimer = setTimeout(() => resetTracking(), 3000); });
     resetBtn.addEventListener('touchend', () => clearTimeout(resetTimer)); resetBtn.addEventListener('touchcancel', () => clearTimeout(resetTimer));
     resetBtn.addEventListener('mousedown', () => resetTimer = setTimeout(() => resetTracking(), 3000));
     resetBtn.addEventListener('mouseup', () => clearTimeout(resetTimer)); resetBtn.addEventListener('mouseleave', () => clearTimeout(resetTimer));
     
+    // 🧹 ОЧИСТКА СЛУШАТЕЛЕЙ ПРИ УХОДЕ В ФОН
+    document.addEventListener('visibilitychange', () => {
+        updateBgIndicator();
+        if (document.hidden && isTracking) {
+            if (motionListener) window.removeEventListener('devicemotion', motionListener);
+            if (oriListenerAbs) window.removeEventListener('deviceorientationabsolute', oriListenerAbs);
+            if (oriListener) window.removeEventListener('deviceorientation', oriListener);
+        } else if (!document.hidden && isTracking) {
+            window.addEventListener('devicemotion', motionListener, {passive:true});
+            window.addEventListener('deviceorientationabsolute', handleOrientation, {passive:true});
+            window.addEventListener('deviceorientation', handleOrientation, {passive:true});
+        }
+    });
+    
+    // 🧹 ОЧИСТКА ПРИ ЗАКРЫТИИ
+    window.addEventListener('beforeunload', () => {
+        if (pulseTimer) clearInterval(pulseTimer);
+        if (stopTimeout) clearTimeout(stopTimeout);
+        if (resetTimer) clearTimeout(resetTimer);
+        if (motionListener) window.removeEventListener('devicemotion', motionListener);
+        if (calibOriListener) window.removeEventListener('deviceorientation', calibOriListener);
+        if (wakeLock) wakeLock.release();
+    });
+    
     function initCompass() {
-        window.addEventListener('deviceorientationabsolute', handleOrientation); window.addEventListener('deviceorientation', handleOrientation);
-        startBtn.onclick = startTracking; statusTextSpan.textContent = '🔄 Ожидание...'; console.log('14 задач активировано');
+        oriListenerAbs = (e) => handleOrientation(e);
+        oriListener = (e) => handleOrientation(e);
+        window.addEventListener('deviceorientationabsolute', oriListenerAbs, {passive:true});
+        window.addEventListener('deviceorientation', oriListener, {passive:true});
+        startBtn.onclick = startTracking;
+        statusTextSpan.textContent = '🔄 Ожидание...';
+        updateBgIndicator();
+        console.log('14 задач + 3 улучшения: Навигатор готов');
     }
     
     const mainLogo = document.getElementById('mainLogo'); mainLogo.onerror = () => { mainLogo.style.display = 'none'; };
