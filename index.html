@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Анти ИИ Навигатор">
     <title>Анти ИИ Навигатор (Прямо)</title>
     
-    <!-- 🔷 PWA: Встроенный манифест (работает без manifest.json) -->
+    <!-- PWA манифест (встроенный) -->
     <link rel="manifest" href='data:application/manifest+json,{"name":"Анти ИИ Навигатор (Прямо)","short_name":"Навигатор","start_url":"./index.html","display":"standalone","background_color":"#000000","theme_color":"#00ff41","orientation":"portrait","icons":[{"src":"favicon.ico","sizes":"32x32","type":"image/x-icon"}]}'>
     
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -21,11 +21,11 @@
         body { background: #000; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; color: #fff; }
         .screen { position: relative; width: 100vw; height: 100vh; max-width: 450px; max-height: 800px; aspect-ratio: 9/16; background: #000; margin: 0 auto; }
         
-        /* 🔷 ЛОГОТИП */
+        /* Логотип */
         .logo-top { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 100; background: rgba(0,15,0,0.7); backdrop-filter: blur(12px); border-radius: 40px; padding: 6px 16px; border: 1px solid rgba(0,255,65,0.4); display: flex; align-items: center; gap: 8px; pointer-events: none; }
         .logo-top img { width: 32px; height: 32px; display: block; filter: drop-shadow(0 0 6px rgba(0,255,65,0.6)); }
         
-        /* 🟢 ИНДИКАТОР ФОНОВОЙ РАБОТЫ (новое) */
+        /* Индикатор фоновой работы */
         .bg-indicator {
             position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px;
             width: 10px; height: 10px; background: #ff4444; border-radius: 50%;
@@ -35,7 +35,7 @@
         .bg-indicator.active { background: #00ff41; animation: bgPulse 2s infinite; }
         @keyframes bgPulse { 0%,100% { opacity:1; box-shadow:0 0 8px #00ff41; } 50% { opacity:0.5; box-shadow:0 0 2px #00ff41; } }
         
-        /* СТРАНИЦА 1: ЗАСТАВКА */
+        /* Страница 1: заставка */
         #page-splash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; background: #000; }
         .splash-media { position: relative; width: 100%; height: 100%; }
         .splash-media img, .splash-media video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -44,7 +44,7 @@
         .sound-btn { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 60; background: linear-gradient(145deg, rgba(20,40,20,0.9) 0%, rgba(10,25,10,0.98) 100%); backdrop-filter: blur(12px); border-radius: 60px; border: 1px solid rgba(0,255,65,0.4); padding: 10px 24px; cursor: pointer; display: flex; gap: 10px; font-size: 0.9rem; font-weight: 700; color: #00ff41; transition: 0.1s; }
         .sound-btn:active { transform: translateX(-50%) translateY(3px); background: #00ff41; color: #000; }
         
-        /* СТРАНИЦА 2: КАЛИБРОВКА */
+        /* Страница 2: калибровка + поддержка */
         #page-calibrate { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 40; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 70px 20px 30px; opacity: 0; visibility: hidden; transition: opacity 0.4s ease; }
         #page-calibrate.show { opacity: 1; visibility: visible; z-index: 45; }
         
@@ -55,34 +55,24 @@
         
         .calib-title { font-size: 1.3rem; color: #00ff41; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; }
         .calib-hint { font-size: 0.9rem; color: #ffaa33; background: rgba(30,30,10,0.7); padding: 14px; border-radius: 28px; margin: 15px 0; }
-        
         .calib-progress-wrap { margin: 20px 0; width: 100%; max-width: 260px; }
         .calib-progress-bg { background: rgba(255,255,255,0.1); border-radius: 20px; height: 12px; overflow: hidden; }
         .calib-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00ff41, #00cc33); transition: width 0.1s linear; border-radius: 20px; }
         .calib-status { font-size: 0.8rem; color: #888; margin-top: 12px; min-height: 3.2rem; display: flex; align-items: center; justify-content: center; text-align: center; }
         .calib-status.ok { color: #00ff41; font-weight: bold; }
         
-        /* 🔴 БЛОК ПОВТОРНОГО ЗАПРОСА РАЗРЕШЕНИЙ (новое) */
-        .perm-denied {
-            display: none; background: rgba(40,10,10,0.9); border: 1px solid #ff4444;
-            border-radius: 20px; padding: 12px; margin: 10px 0; text-align: center;
-        }
-        .perm-denied.show { display: block; animation: fadeIn 0.3s; }
+        .perm-denied { display: none; background: rgba(40,10,10,0.9); border: 1px solid #ff4444; border-radius: 20px; padding: 12px; margin: 10px 0; text-align: center; }
+        .perm-denied.show { display: block; }
         .perm-denied p { font-size: 0.75rem; color: #ff8888; margin-bottom: 8px; }
-        .retry-btn {
-            background: linear-gradient(145deg, rgba(40,20,20,0.9), rgba(20,5,5,0.98));
-            border: 1px solid #ff6666; color: #ff8888; padding: 8px 20px;
-            border-radius: 30px; font-size: 0.8rem; cursor: pointer; font-weight: 600;
-        }
+        .retry-btn { background: linear-gradient(145deg, rgba(40,20,20,0.9), rgba(20,5,5,0.98)); border: 1px solid #ff6666; color: #ff8888; padding: 8px 20px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; font-weight: 600; }
         .retry-btn:active { background: #ff4444; color: #000; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
         
         .phone-number { background: rgba(30,30,30,0.8); padding: 12px; border-radius: 50px; font-size: 1rem; font-family: monospace; color: #00ff41; margin: 12px 0; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .copy-btn { background: #2a4a2a; border: none; padding: 6px 14px; border-radius: 30px; color: #0f0; font-size: 0.75rem; cursor: pointer; }
         .copy-btn:active { background: #0f0; color: #000; }
         .support-link a { color: #88ff88; text-decoration: none; font-size: 0.75rem; border-bottom: 1px dashed rgba(0,255,65,0.4); }
         
-        /* СТРАНИЦА 3: НАВИГАТОР */
+        /* Страница 3: навигатор */
         #page-compass { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 30; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 70px 12px 20px; opacity: 0; visibility: hidden; transition: opacity 0.4s ease; }
         #page-compass.show { opacity: 1; visibility: visible; z-index: 55; }
         
@@ -112,33 +102,27 @@
 </head>
 <body>
 <div class="screen">
-    <!-- 🔷 ЛОГОТИП -->
     <div class="logo-top"><img src="favicon.ico" alt="logo" id="mainLogo"></div>
-    
-    <!-- 🟢 ИНДИКАТОР ФОНОВОЙ РАБОТЫ (новое) -->
     <div class="bg-indicator" id="bgIndicator" title="Работает в фоне"></div>
     
-    <!-- СТРАНИЦА 1: ЗАСТАВКА -->
+    <!-- Страница 1: заставка -->
     <div id="page-splash">
         <div class="splash-media"><img id="splash-img" src="frame.jpg" alt=""><video id="splash-video" src="cube.mp4" muted playsinline preload="auto"></video></div>
         <button id="soundBtn" class="sound-btn">🔇 Включить звук</button>
     </div>
     
-    <!-- СТРАНИЦА 2: КАЛИБРОВКА + ПОДДЕРЖКА -->
+    <!-- Страница 2: калибровка + поддержка -->
     <div id="page-calibrate">
         <div class="calib-card">
             <div class="calib-title">🧭 КАЛИБРОВКА 🔄</div>
             <div class="calib-hint">🔄 Покрутите телефон «восьмёркой» 3-5 секунд</div>
             <div class="calib-progress-wrap"><div class="calib-progress-bg"><div class="calib-progress-fill" id="calibProgress"></div></div></div>
             <div class="calib-status" id="calibStatus">📡 Ожидание движения...</div>
-            
-            <!-- 🔴 БЛОК ПОВТОРНОГО ЗАПРОСА РАЗРЕШЕНИЙ (новое) -->
             <div class="perm-denied" id="permDenied">
                 <p>⚠️ Доступ к датчикам отклонён</p>
                 <button class="retry-btn" id="retryPermBtn">🔄 Повторить запрос</button>
             </div>
         </div>
-        
         <div class="support-card">
             <h3>🤝 ПОДДЕРЖАТЬ ПРОЕКТ</h3>
             <p>💙 Приложение бесплатное. Было и останется.</p>
@@ -150,12 +134,12 @@
         </div>
     </div>
     
-    <!-- СТРАНИЦА 3: ОСНОВНОЙ НАВИГАТОР -->
+    <!-- Страница 3: основной навигатор -->
     <div id="page-compass">
         <div class="indicator-bar"><span id="batLevel">🔋 --%</span><span id="driftStatus">GYRO OK</span><span id="pulseStatus">💓 --</span></div>
         <div id="compass-area"><div id="arrow"></div></div>
         <div id="angle">0°</div><div id="target-angle">🎯 ЦЕЛЬ: —</div><div id="status-text">🔄 Ожидание...</div>
-        <button class="btn" id="startBtn" disabled>🔒 ЖДУ ТОЧНОСТИ</button>
+        <div><button class="btn" id="startBtn" disabled>🔒 ЖДУ ТОЧНОСТИ</button></div>
         <button class="btn btn-reset" id="resetBtn">⏱️ УДЕРЖИВАЙТЕ 3С ДЛЯ СБРОСА</button>
         <div id="calib-hint">🔄 Покрутите телефон «восьмёркой» для точности</div>
         <div style="font-size:0.5rem; color:#1a3a1a; margin:5px;">🛡️ Анти ИИ Навигатор | Лесной режим</div>
@@ -163,7 +147,7 @@
 </div>
 
 <script>
-    // ========== ЗВУКИ ==========
+    // ========== 1. ЗВУКИ ==========
     let soundEnabled = true, currentAudio = null;
     const audioElements = {};
     ['straight','left','right','back','calibrate','lowbat'].forEach(name => {
@@ -177,39 +161,42 @@
     }
     function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
     
-    // 🔐 РАЗРЕШЕНИЯ ДЛЯ iOS/ANDROID 13+
+    // ========== 2. ЗАПРОС РАЗРЕШЕНИЙ (универсальный для iOS/Android) ==========
     let sensorPermission = null;
-    async function requestSensorPermission() {
-        if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+    async function requestPermissions() {
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
             try {
                 const perm = await DeviceOrientationEvent.requestPermission();
                 sensorPermission = (perm === 'granted');
+                if (sensorPermission) {
+                    // Уже в функции handleOrientation будем ловить события, но подключаем слушатели здесь
+                    window.addEventListener('deviceorientation', handleOrientation, true);
+                    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                }
                 return sensorPermission;
-            } catch(e) { sensorPermission = false; return false; }
+            } catch(e) { console.error("Ошибка доступа к компасу", e); sensorPermission = false; return false; }
+        } else {
+            // Android и старые версии iOS: разрешение не требуется
+            sensorPermission = true;
+            window.addEventListener('deviceorientation', handleOrientation, true);
+            window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+            return true;
         }
-        sensorPermission = true; return true;
     }
     
-    // 🔴 ПОВТОРНЫЙ ЗАПРОС РАЗРЕШЕНИЙ (новое)
-    function showPermDenied() {
-        const el = document.getElementById('permDenied');
-        if (el) el.classList.add('show');
-    }
-    function hidePermDenied() {
-        const el = document.getElementById('permDenied');
-        if (el) el.classList.remove('show');
-    }
-    
+    // ========== 3. АКТИВАЦИЯ АУДИО И ПЕРВЫЙ ЗАПРОС РАЗРЕШЕНИЙ ==========
     function unlockAudio() {
         if (window.audioUnlocked) return;
         window.audioUnlocked = true;
-        const t = new Audio(); t.volume = 0.01; t.play().catch(()=>{});
-        requestSensorPermission();
+        // Активируем аудио-канал через пустой короткий звук
+        const silent = new Audio(); silent.volume = 0.01; silent.play().catch(()=>{});
+        // Запрашиваем разрешения на датчики (но не ждём результата — просто инициируем)
+        requestPermissions().catch(()=>{});
     }
     document.addEventListener('click', unlockAudio, {once:true, passive:true});
     document.addEventListener('touchstart', unlockAudio, {once:true, passive:true});
     
-    // ========== ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ ==========
+    // ========== 4. ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ ==========
     const splash = document.getElementById('page-splash'), pageCalibrate = document.getElementById('page-calibrate'), pageCompass = document.getElementById('page-compass');
     const splashImg = document.getElementById('splash-img'), splashVideo = document.getElementById('splash-video');
     let videoStarted = false, splashEnded = false;
@@ -218,7 +205,7 @@
         soundEnabled = !soundEnabled;
         splashVideo.muted = !soundEnabled;
         document.getElementById('soundBtn').innerHTML = soundEnabled ? '🔊 Звук вкл' : '🔇 Включить звук';
-        if (soundEnabled) { unlockAudio(); await requestSensorPermission(); }
+        if (soundEnabled) { unlockAudio(); await requestPermissions(); }
     };
     
     function showVideo() {
@@ -229,30 +216,29 @@
     }
     function showCalibratePage() {
         if (splashEnded) return; splashEnded = true; splash.style.display = 'none';
-        pageCalibrate.classList.add('show'); startCalibrationCheck();
+        pageCalibrate.classList.add('show');
+        (async () => { await requestPermissions(); startCalibrationCheck(); })();
     }
     if (splashImg.complete && splashImg.naturalWidth) setTimeout(showVideo, 2000);
     else { splashImg.onload = () => setTimeout(showVideo, 2000); setTimeout(() => { if (!videoStarted) showVideo(); }, 2500); }
     
-    // ========== КАЛИБРОВКА: СТРОГИЙ ДЕТЕКТОР "ВОСЬМЁРКИ" ==========
+    // ========== 5. КАЛИБРОВКА (накопление углов) ==========
     let calibDone = false, calibRotation = 0, calibStartTime = 0, lastOri = {a:null,b:null,g:null};
     const CALIB_TARGET = 320, CALIB_MIN_TIME = 2000;
     let calibOriListener = null;
     
     function startCalibrationCheck() {
         const statusEl = document.getElementById('calibStatus'), progressEl = document.getElementById('calibProgress');
-        
-        // 🔴 Если разрешения нет — показываем кнопку "Повторить"
         if (sensorPermission === false) {
-            showPermDenied();
+            document.getElementById('permDenied').classList.add('show');
             statusEl.textContent = '⚠️ Нет доступа к датчикам';
             return;
         }
-        
+        hidePermDenied();
         calibOriListener = (e) => {
             if (calibDone) return;
             const a = e.alpha ?? 0, b = e.beta ?? 0, g = e.gamma ?? 0;
-            if (lastOri.a === null) { lastOri = {a,b,g}; return; }
+            if (lastOri.a === null) { lastOri = {a,b,g}; calibStartTime = Date.now(); return; }
             const da = Math.abs(a - lastOri.a), na = da > 180 ? 360 - da : da;
             const db = Math.abs(b - lastOri.b), nb = db > 180 ? 360 - db : db;
             const dg = Math.abs(g - lastOri.g), ng = dg > 180 ? 360 - dg : dg;
@@ -275,15 +261,17 @@
         }
     }
     
-    // 🔴 ОБРАБОТЧИК КНОПКИ "ПОВТОРИТЬ ЗАПРОС" (новое)
+    function hidePermDenied() { document.getElementById('permDenied')?.classList.remove('show'); }
+    function showPermDenied() { document.getElementById('permDenied')?.classList.add('show'); }
+    
     document.getElementById('retryPermBtn')?.addEventListener('click', async () => {
         hidePermDenied();
-        const granted = await requestSensorPermission();
+        const granted = await requestPermissions();
         if (granted) {
             document.getElementById('calibStatus').textContent = '✅ Доступ получен! Начинайте калибровку...';
-            startCalibrationCheck(); // Перезапускаем калибровку
+            startCalibrationCheck();
         } else {
-            showPermDenied(); // Снова показываем, если отказали
+            showPermDenied();
         }
     });
     
@@ -292,31 +280,26 @@
         catch(e) { alert('Нажмите и удерживайте номер для копирования'); }
     };
     
-    // ========== 14 ЗАДАЧ: НАВИГАТОР ==========
+    // ========== 6. ОСНОВНАЯ ЛОГИКА НАВИГАТОРА ==========
     let targetAngle = null, isTracking = false, lastCommandTime = 0, pulseTimer = null, isMoving = false;
     let stopTimeout = null, resetTimer = null, lastHeading = 0, lastHeadingTime = 0, compassReliable = false;
     let wakeLock = null, batteryWarned = false;
-    let motionListener = null, oriListenerAbs = null, oriListener = null;
+    let motionListener = null, oriListener = null, oriListenerAbs = null;
     
     const startBtn = document.getElementById('startBtn'), resetBtn = document.getElementById('resetBtn');
     const arrow = document.getElementById('arrow'), angleSpan = document.getElementById('angle');
     const targetSpan = document.getElementById('target-angle'), statusTextSpan = document.getElementById('status-text');
     const calibHint = document.getElementById('calib-hint'), batLevelSpan = document.getElementById('batLevel');
     const driftStatusSpan = document.getElementById('driftStatus'), pulseStatusSpan = document.getElementById('pulseStatus');
-    
-    // 🟢 ИНДИКАТОР ФОНОВОЙ РАБОТЫ (новое)
     const bgIndicator = document.getElementById('bgIndicator');
+    
     function updateBgIndicator() {
         if (!bgIndicator) return;
-        // Зелёная точка = приложение активно и держит wakeLock
-        if (isTracking && wakeLock) {
-            bgIndicator.classList.add('active');
-        } else {
-            bgIndicator.classList.remove('active');
-        }
+        if (isTracking && wakeLock) bgIndicator.classList.add('active');
+        else bgIndicator.classList.remove('active');
     }
     
-    // 🔋 БАТАРЕЯ
+    // Батарея
     if ('getBattery' in navigator) {
         navigator.getBattery().then(batt => {
             const update = () => {
@@ -329,39 +312,45 @@
         });
     }
     
-    // 🚶 ДЕТЕКТОР ДВИЖЕНИЯ
+    // Детектор движения со сглаживанием (скользящее среднее)
+    let moveScores = [];
     motionListener = (e) => {
         const a = e.accelerationIncludingGravity; if (!a) return;
         const force = Math.sqrt(a.x**2 + a.y**2 + a.z**2);
-        if (Math.abs(force - 9.8) > 2.2) { isMoving = true; if (stopTimeout) clearTimeout(stopTimeout); }
-        else { if (!stopTimeout) stopTimeout = setTimeout(() => { isMoving = false; stopTimeout = null; }, 5000); }
+        moveScores.push(force);
+        if (moveScores.length > 10) moveScores.shift();
+        const avgForce = moveScores.reduce((a,b) => a+b,0) / moveScores.length;
+        const wasMoving = isMoving;
+        isMoving = avgForce > 10.8;   // оптимальный порог для спокойного шага
+        if (!wasMoving && isMoving) console.log("Движение начато");
+        else if (wasMoving && !isMoving) console.log("Движение остановлено");
     };
     window.addEventListener('devicemotion', motionListener, {passive:true});
     
-    // 💓 ПУЛЬС
+    // Пульс с визуальным миганием
     function startPulse() {
         if (pulseTimer) clearInterval(pulseTimer);
         pulseTimer = setInterval(() => {
             if (!isTracking) return;
             vibrate(40);
-            pulseStatusSpan.textContent = '💓';
-            pulseStatusSpan.style.color = '#00ff41';
-            pulseStatusSpan.style.textShadow = '0 0 8px #00ff41';
-            setTimeout(() => {
-                if (isTracking) { pulseStatusSpan.textContent = '💓 --'; pulseStatusSpan.style.color = '#3a8a3a'; pulseStatusSpan.style.textShadow = 'none'; }
-            }, 400);
+            if (pulseStatusSpan) {
+                pulseStatusSpan.textContent = '💓';
+                pulseStatusSpan.style.color = '#00ff41';
+                pulseStatusSpan.style.textShadow = '0 0 8px #00ff41';
+                setTimeout(() => {
+                    if (isTracking) { pulseStatusSpan.textContent = '💓 --'; pulseStatusSpan.style.color = '#3a8a3a'; pulseStatusSpan.style.textShadow = 'none'; }
+                }, 400);
+            }
         }, 30000);
     }
-    function stopPulse() { if (pulseTimer) { clearInterval(pulseTimer); pulseTimer = null; pulseStatusSpan.textContent = '💓 --'; pulseStatusSpan.style.color = '#3a8a3a'; } }
+    function stopPulse() { if (pulseTimer) { clearInterval(pulseTimer); pulseTimer = null; if(pulseStatusSpan) { pulseStatusSpan.textContent = '💓 --'; pulseStatusSpan.style.color = '#3a8a3a'; } } }
     
-    // 🔒 ТОЧНОСТЬ
     function checkAccuracy(accuracy) {
         const isGood = accuracy <= 25 && accuracy >= 0; compassReliable = isGood;
         if (!isGood) { calibHint.classList.add('show'); if (!isTracking) { startBtn.disabled = true; startBtn.textContent = '⚠️ КАЛИБРОВКА'; } arrow.classList.add('unreliable'); }
         else { calibHint.classList.remove('show'); if (!isTracking) { startBtn.disabled = false; startBtn.textContent = '🎯 ЗАДАТЬ КУРС'; } arrow.classList.remove('unreliable'); }
     }
     
-    // 🧭 ОСНОВНОЙ ДАТЧИК
     function handleOrientation(event) {
         let heading = event.webkitCompassHeading || (360 - event.alpha); if (heading === undefined) return;
         const accuracy = event.webkitCompassAccuracy || event.accuracy || 25;
@@ -389,18 +378,19 @@
         } else { arrow.style.transform = 'rotate(0deg)'; }
     }
     
-    // 🚀 СТАРТ
-    async function startTracking() {
-        const permOk = await requestSensorPermission();
-        if (!permOk) { showPermDenied(); statusTextSpan.textContent = '❌ Нет доступа к датчикам'; return; }
-        hidePermDenied();
+    // Привязка к кнопке старта – запрашиваем права и активируем аудио, затем запускаем 5‑секундный отсчёт
+    startBtn.addEventListener('click', async () => {
+        // Явный запрос разрешений и активация аудио-канала
+        await requestPermissions();
+        // Активация аудио через проигрывание и паузу всех звуков
+        document.querySelectorAll('audio').forEach(snd => { snd.play(); snd.pause(); });
+        
         if (!compassReliable) { playSound('calibrate'); vibrate([300, 100, 300]); return; }
         startBtn.style.display = 'none';
         let count = 5;
         const timer = setInterval(() => { statusTextSpan.textContent = `📱 В КАРМАН: ${count}`; if (count-- <= 0) { clearInterval(timer); targetAngle = Math.round(parseInt(angleSpan.textContent)); isTracking = true; batteryWarned = false; statusTextSpan.textContent = `✅ КУРС ${targetAngle}°`; playSound('straight'); vibrate([100, 50, 100]); resetBtn.style.display = 'block'; startPulse(); updateBgIndicator(); if ('wakeLock' in navigator) { navigator.wakeLock.request('screen').then(lock => { wakeLock = lock; updateBgIndicator(); }).catch(() => {}); } } }, 1000);
-    }
+    });
     
-    // 🔄 СБРОС
     function resetTracking() {
         isTracking = false; targetAngle = null; resetBtn.style.display = 'none'; startBtn.style.display = 'block';
         arrow.style.transform = 'rotate(0deg)'; targetSpan.textContent = '🎯 ЦЕЛЬ: —'; statusTextSpan.textContent = '🎯 КУРС СБРОШЕН'; statusTextSpan.style.color = '#666';
@@ -413,7 +403,7 @@
     resetBtn.addEventListener('mousedown', () => resetTimer = setTimeout(() => resetTracking(), 3000));
     resetBtn.addEventListener('mouseup', () => clearTimeout(resetTimer)); resetBtn.addEventListener('mouseleave', () => clearTimeout(resetTimer));
     
-    // 🧹 ОЧИСТКА СЛУШАТЕЛЕЙ ПРИ УХОДЕ В ФОН
+    // Убираем слушатели при скрытии страницы (экономия батареи)
     document.addEventListener('visibilitychange', () => {
         updateBgIndicator();
         if (document.hidden && isTracking) {
@@ -427,7 +417,6 @@
         }
     });
     
-    // 🧹 ОЧИСТКА ПРИ ЗАКРЫТИИ
     window.addEventListener('beforeunload', () => {
         if (pulseTimer) clearInterval(pulseTimer);
         if (stopTimeout) clearTimeout(stopTimeout);
@@ -438,14 +427,15 @@
     });
     
     function initCompass() {
-        oriListenerAbs = (e) => handleOrientation(e);
+        // Слушатели уже подключены в requestPermissions, но для надёжности дублируем
         oriListener = (e) => handleOrientation(e);
-        window.addEventListener('deviceorientationabsolute', oriListenerAbs, {passive:true});
+        oriListenerAbs = (e) => handleOrientation(e);
         window.addEventListener('deviceorientation', oriListener, {passive:true});
-        startBtn.onclick = startTracking;
+        window.addEventListener('deviceorientationabsolute', oriListenerAbs, {passive:true});
+        startBtn.disabled = false; // Кнопка станет активной после проверки точности
         statusTextSpan.textContent = '🔄 Ожидание...';
         updateBgIndicator();
-        console.log('14 задач + 3 улучшения: Навигатор готов');
+        console.log('✅ Навигатор готов (14 задач + все улучшения)');
     }
     
     const mainLogo = document.getElementById('mainLogo'); mainLogo.onerror = () => { mainLogo.style.display = 'none'; };
